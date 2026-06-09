@@ -31,7 +31,6 @@ const MockedMediaCallProvider = ({
 	instanceProps,
 }: MockedMediaCallProviderProps) => {
 	const [peerInfo, setPeerInfo] = useState<PeerInfo | undefined>({
-		external: false,
 		displayName: 'John Doe',
 		userId: '1234567890',
 		avatarUrl,
@@ -80,7 +79,6 @@ const MockedMediaCallProvider = ({
 			displayName: peer.label,
 			userId: peer.value,
 			avatarUrl: peer.avatarUrl,
-			external: false as const,
 			username: peer.identifier,
 			callerId: peer.value,
 		});
