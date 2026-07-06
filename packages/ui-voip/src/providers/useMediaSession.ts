@@ -140,30 +140,6 @@ export const useMediaSession = (instance?: MediaSignalingSession): SessionState 
 				return undefined;
 			})();
 
-			if (contact.type === 'sip') {
-				dispatch({
-					type: 'instance_updated',
-					payload: {
-						peerInfo: {
-							...derivePeerInfoFromInstanceContact(contact),
-							avatarUrl,
-						},
-						transferredBy,
-						state,
-						muted,
-						held,
-						connectionState,
-						hidden,
-						remoteHeld,
-						remoteMuted,
-						callId,
-						startedAt,
-						supportedFeatures,
-					},
-				});
-				return;
-			}
-
 			const peerInfo = {
 				...derivePeerInfoFromInstanceContact(contact),
 				avatarUrl,
