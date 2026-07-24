@@ -365,10 +365,27 @@ export class LDAPEEManager extends LDAPManager {
 		const ldapGroups = Object.keys(groupsToRolesMap);
 		const roleList: Array<IRole['_id']> = [];
 		const roleIdsList: Array<IRole['_id']> = [];
+
+		// Index roles by _id and name once instead of scanning the full role
+		// list twice for every mapped role. Lookup order (_id first, then
+		// name) is preserved, and like Array.prototype.find, the first
+		// occurrence wins.
+		const rolesById = new Map<string, (typeof roles)[number]>();
+		const rolesByName = new Map<string, (typeof roles)[number]>();
+		for (const role of roles) {
+			if (!rolesById.has(role._id)) {
+				rolesById.set(role._id, role);
+			}
+			if (!rolesByName.has(role.name)) {
+				rolesByName.set(role.name, role);
+			}
+		}
+		const findRole = (roleIdOrName: string) => rolesById.get(roleIdOrName) ?? rolesByName.get(roleIdOrName);
+
 		const allowedRoles: Array<IRole['_id']> = this.getDataMappedByLdapGroups(groupsToRolesMap, ldapGroups)
 			.map((role) => role.split(/\.(.+)/)[0])
 			.reduce((allowedRolesIds: string[], roleIdOrName: string) => {
-				const role = roles.find((role) => role._id === roleIdOrName) ?? roles.find((role) => role.name === roleIdOrName);
+				const role = findRole(roleIdOrName);
 				if (role) {
 					allowedRolesIds.push(role._id);
 				}
@@ -386,10 +403,10 @@ export class LDAPEEManager extends LDAPManager {
 			}
 		}
 
-		for await (const nonValidatedRole of roleList) {
+		for (const nonValidatedRole of roleList) {
 			const [roleIdOrName] = nonValidatedRole.split(/\.(.+)/);
 
-			const role = roles.find((role) => role._id === roleIdOrName) ?? roles.find((role) => role.name === roleIdOrName);
+			const role = findRole(roleIdOrName);
 			if (role) {
 				roleIdsList.push(role._id);
 			}

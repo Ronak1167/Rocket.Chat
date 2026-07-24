@@ -31,7 +31,11 @@ const getTextWrapper = (marker, tagName) => (textPrepend, wrappedText, textAppen
 
 const getRegexReplacer = (replaceFunction, getRegex) => (marker, tagName) => {
 	const wrapper = getTextWrapper(marker, tagName);
-	return (msg) => msg.replace(getRegex(marker), (...args) => replaceFunction(wrapper, ...args));
+	// The regex only depends on the marker, so build it once when the parser is
+	// created instead of on every message. Safe with /g because
+	// String.prototype.replace resets lastIndex on each call.
+	const regex = getRegex(marker);
+	return (msg) => msg.replace(regex, (...args) => replaceFunction(wrapper, ...args));
 };
 
 const getParserWithCustomMarker = getRegexReplacer(
@@ -61,6 +65,23 @@ const parseItalic = getRegexReplacer(
 	() => new RegExp('([^\\r\\n\\s~*_]){0,1}(\\_+(?!\\s))([^\\_\\r\\n]+)(\\_+)([^\\r\\n\\s]){0,1}', 'gm'),
 )('_', 'em');
 
+// The link regexes only vary with the configured URL schemes, which come from
+// a setting that rarely changes; cache the compiled regexes for the last seen
+// value instead of recompiling them for every message.
+let cachedSchemes;
+let cachedLinkRegexes;
+const getLinkRegexes = (schemes) => {
+	if (schemes !== cachedSchemes || !cachedLinkRegexes) {
+		cachedSchemes = schemes;
+		cachedLinkRegexes = {
+			image: new RegExp(`!\\[([^\\]]+)\\]\\(((?:${schemes}):\\/\\/[^\\s]+)\\)`, 'gm'),
+			link: new RegExp(`\\[([^\\]]+)\\]\\(((?:${schemes}):\\/\\/[^\\s]+)\\)`, 'gm'),
+			pipedLink: new RegExp(`(?:<|&lt;)((?:${schemes}):\\\/\\\/[^\\|]+)\\|(.+?)(?=>|&gt;)(?:>|&gt;)`, 'gm'),
+		};
+	}
+	return cachedLinkRegexes;
+};
+
 const parseNotEscaped = (message, { supportSchemesForLink, headers, rootUrl }) => {
 	let msg = message.html;
 	if (!message.tokens) {
@@ -68,6 +89,7 @@ const parseNotEscaped = (message, { supportSchemesForLink, headers, rootUrl }) =
 	}
 
 	const schemes = (supportSchemesForLink || '').split(',').join('|');
+	const linkRegexes = getLinkRegexes(schemes);
 
 	if (headers) {
 		// Support # Text for h1
@@ -130,7 +152,7 @@ const parseNotEscaped = (message, { supportSchemesForLink, headers, rootUrl }) =
 	msg = msg.replace(/<\/blockquote>\n<blockquote/gm, '</blockquote><blockquote');
 
 	// Support ![alt text](http://image url)
-	msg = msg.replace(new RegExp(`!\\[([^\\]]+)\\]\\(((?:${schemes}):\\/\\/[^\\s]+)\\)`, 'gm'), (match, title, url) => {
+	msg = msg.replace(linkRegexes.image, (match, title, url) => {
 		if (!validateUrl(url, message)) {
 			return match;
 		}
@@ -148,7 +170,7 @@ const parseNotEscaped = (message, { supportSchemesForLink, headers, rootUrl }) =
 	});
 
 	// Support [Text](http://link)
-	msg = msg.replace(new RegExp(`\\[([^\\]]+)\\]\\(((?:${schemes}):\\/\\/[^\\s]+)\\)`, 'gm'), (match, title, url) => {
+	msg = msg.replace(linkRegexes.link, (match, title, url) => {
 		if (!validateUrl(url, message)) {
 			return match;
 		}
@@ -168,7 +190,7 @@ const parseNotEscaped = (message, { supportSchemesForLink, headers, rootUrl }) =
 	});
 
 	// Support <http://link|Text>
-	msg = msg.replace(new RegExp(`(?:<|&lt;)((?:${schemes}):\\\/\\\/[^\\|]+)\\|(.+?)(?=>|&gt;)(?:>|&gt;)`, 'gm'), (match, url, title) => {
+	msg = msg.replace(linkRegexes.pipedLink, (match, url, title) => {
 		if (!validateUrl(url, message)) {
 			return match;
 		}

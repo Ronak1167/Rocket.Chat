@@ -285,7 +285,7 @@ export class SettingsRegistry {
 			{
 				$set: settingProps,
 				...(removedKeys?.length && {
-					$unset: removedKeys.reduce((unset, key) => ({ ...unset, [key]: 1 }), {}),
+					$unset: Object.fromEntries(removedKeys.map((key) => [key, 1])),
 				}),
 			},
 			{ upsert: true },

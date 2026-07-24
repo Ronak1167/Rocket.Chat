@@ -1,3 +1,21 @@
+const inlineCodeRegex = /`([^`\r\n]+)\`/gm;
+
+// The link regexes only vary with the configured URL schemes, which come from
+// a setting that rarely changes; cache the compiled regexes for the last seen
+// value instead of recompiling them for every notification.
+let cachedSchemes;
+let cachedLinkRegexes;
+const getLinkRegexes = (schemes) => {
+	if (schemes !== cachedSchemes || !cachedLinkRegexes) {
+		cachedSchemes = schemes;
+		cachedLinkRegexes = {
+			link: new RegExp(`!?\\[([^\\]]+)\\]\\((?:${schemes}):\\/\\/[^\\)]+\\)`, 'gm'),
+			pipedLink: new RegExp(`(?:<|&lt;)(?:${schemes}):\\/\\/[^\\|]+\\|(.+?)(?=>|&gt;)(?:>|&gt;)`, 'gm'),
+		};
+	}
+	return cachedLinkRegexes;
+};
+
 /**
  * Filter markdown tags in message
  * Use case: notifications
@@ -10,21 +28,19 @@ export const filtered = (
 	},
 ) => {
 	const schemes = (options.supportSchemesForLink || 'http,https').split(',').join('|');
+	const linkRegexes = getLinkRegexes(schemes);
 
 	// Remove block code backticks
 	message = message.replace(/```/g, '');
 
 	// Remove inline code backticks
-	message = message.replace(new RegExp(/`([^`\r\n]+)\`/gm), (match) => match.substr(1, match.length - 2));
+	message = message.replace(inlineCodeRegex, (match) => match.substr(1, match.length - 2));
 
 	// Filter [text](url), ![alt_text](image_url)
-	message = message.replace(new RegExp(`!?\\[([^\\]]+)\\]\\((?:${schemes}):\\/\\/[^\\)]+\\)`, 'gm'), (match, title) => title);
+	message = message.replace(linkRegexes.link, (match, title) => title);
 
 	// Filter <http://link|Text>
-	message = message.replace(
-		new RegExp(`(?:<|&lt;)(?:${schemes}):\\/\\/[^\\|]+\\|(.+?)(?=>|&gt;)(?:>|&gt;)`, 'gm'),
-		(match, title) => title,
-	);
+	message = message.replace(linkRegexes.pipedLink, (match, title) => title);
 
 	// Filter headings
 	message = message.replace(
