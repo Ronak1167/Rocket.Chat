@@ -9,7 +9,7 @@ export const getEmptyFalse = () => false;
 const a: any[] = [];
 export const getEmptyArray = () => a;
 
-const isCmdOrCtrlPressed = (event: { metaKey: boolean; ctrlKey: boolean }) => {
+export const isCmdOrCtrlPressed = (event: { metaKey: boolean; ctrlKey: boolean }) => {
 	const isMacOS = navigator.platform.indexOf('Mac') !== -1;
 
 	return (isMacOS && event.metaKey) || (!isMacOS && event.ctrlKey);
