@@ -22,6 +22,7 @@ import {
 	getEmptyArray,
 	handleFormattingShortcut,
 	extractImageFilesFromClipboard,
+	getModifierClickHref,
 } from './messageBoxHelpers';
 import { handleRichTextSelectionWrapping } from './wrapSelection';
 import { emoji } from '../../../../../app/emoji/client';
@@ -387,6 +388,17 @@ const RichTextMessageBox = ({
 		}
 	});
 
+	const handleClick = useStableCallback((event: MouseEvent<HTMLDivElement>) => {
+		const href = getModifierClickHref(event);
+
+		if (!href) {
+			return;
+		}
+
+		event.preventDefault();
+		window.open(href, '_blank', 'noopener,noreferrer');
+	});
+
 	const popupOptions = useComposerPopupOptions();
 	const popup = useComposerBoxPopup(popupOptions);
 
@@ -479,6 +491,7 @@ const RichTextMessageBox = ({
 					hideplaceholder={hideplaceholder}
 					hidetext={isRecordingAudio}
 					onPaste={handlePaste}
+					onClick={handleClick}
 					aria-activedescendant={popup.focused ? `popup-item-${popup.focused._id}` : undefined}
 					onBlur={setLastCursorPosition}
 					onFocus={getLastCursorPosition}
