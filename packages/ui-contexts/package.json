@@ -33,7 +33,7 @@
 		"@rocket.chat/tools": "workspace:~",
 		"@types/jest": "~30.0.0",
 		"@types/react": "~19.2.18",
-		"@types/react-dom": "~19.2.3",
+		"@types/react-dom": "~19.2.4",
 		"eslint": "~9.39.5",
 		"i18next": "~23.4.9",
 		"jest": "~30.2.0",

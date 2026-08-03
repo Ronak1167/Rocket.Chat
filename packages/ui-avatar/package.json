@@ -23,7 +23,7 @@
 		"@rocket.chat/icons": "^0.48.0",
 		"@rocket.chat/ui-contexts": "workspace:^",
 		"@types/react": "~19.2.18",
-		"@types/react-dom": "~19.2.3",
+		"@types/react-dom": "~19.2.4",
 		"eslint": "~9.39.5",
 		"react": "~19.2.8",
 		"react-dom": "~19.2.8",
