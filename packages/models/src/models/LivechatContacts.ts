@@ -6,9 +6,29 @@ import type {
 	ILivechatVisitor,
 	RocketChatRecordDeleted,
 } from '@rocket.chat/core-typings';
-import type { FindPaginated, ILivechatContactsModel, InsertionModel, Updater, DocumentWithProjection, FindOptionsWithProjection } from '@rocket.chat/model-typings';
+import type {
+	FindPaginated,
+	ILivechatContactsModel,
+	InsertionModel,
+	Updater,
+	DocumentWithProjection,
+	FindOptionsWithProjection,
+} from '@rocket.chat/model-typings';
 import { escapeRegExp } from '@rocket.chat/string-helpers';
-import type { Document, Collection, Db, RootFilterOperators, Filter, FindCursor, IndexDescription, UpdateResult, UpdateFilter, UpdateOptions, FindOneAndUpdateOptions, AggregationCursor } from 'mongodb';
+import type {
+	Document,
+	Collection,
+	Db,
+	RootFilterOperators,
+	Filter,
+	FindCursor,
+	IndexDescription,
+	UpdateResult,
+	UpdateFilter,
+	UpdateOptions,
+	FindOneAndUpdateOptions,
+	AggregationCursor,
+} from 'mongodb';
 
 import { BaseRaw } from './BaseRaw';
 import { readSecondaryPreferred } from '../readSecondaryPreferred';
@@ -129,7 +149,10 @@ export class LivechatContactsRaw extends BaseRaw<ILivechatContact> implements IL
 		return this.updateOne({ _id: contactId, enabled: { $ne: false } }, update, options);
 	}
 
-	findPaginatedContacts<T extends Document = ILivechatContact, O extends FindOptionsWithProjection<T> = FindOptionsWithProjection<T>>(search: { searchText?: string; unknown?: boolean }, options?: O): FindPaginated<FindCursor<DocumentWithProjection<T, O>>> {
+	findPaginatedContacts<T extends Document = ILivechatContact, O extends FindOptionsWithProjection<T> = FindOptionsWithProjection<T>>(
+		search: { searchText?: string; unknown?: boolean },
+		options?: O,
+	): FindPaginated<FindCursor<DocumentWithProjection<T, O>>> {
 		const { searchText, unknown = false } = search;
 		const searchRegex = escapeRegExp(searchText || '');
 		const match: Filter<ILivechatContact & RootFilterOperators<ILivechatContact>> = {
@@ -142,13 +165,10 @@ export class LivechatContactsRaw extends BaseRaw<ILivechatContact> implements IL
 			enabled: { $ne: false },
 		};
 
-		return this.findPaginated<T, O>(
-			{ ...match },
-			{
-				allowDiskUse: true,
-				...options,
-			},
-		);
+		return this.findPaginated<T, O>({ ...match }, {
+			allowDiskUse: true,
+			...options,
+		} as unknown as O);
 	}
 
 	async findContactMatchingVisitor(visitor: AtLeast<ILivechatVisitor, 'visitorEmails' | 'phone'>): Promise<ILivechatContact | null> {
@@ -199,7 +219,10 @@ export class LivechatContactsRaw extends BaseRaw<ILivechatContact> implements IL
 		};
 	}
 
-	async findOneByVisitor<T extends Document = ILivechatContact, O extends FindOptionsWithProjection<T> = FindOptionsWithProjection<T>>(visitor: ILivechatContactVisitorAssociation, options?: O): Promise<DocumentWithProjection<T, O> | null> {
+	async findOneByVisitor<T extends Document = ILivechatContact, O extends FindOptionsWithProjection<T> = FindOptionsWithProjection<T>>(
+		visitor: ILivechatContactVisitorAssociation,
+		options?: O,
+	): Promise<DocumentWithProjection<T, O> | null> {
 		return this.findOne<T, O>(this.makeQueryForVisitor(visitor), options);
 	}
 
@@ -258,7 +281,14 @@ export class LivechatContactsRaw extends BaseRaw<ILivechatContact> implements IL
 		return this.updateFromUpdater(this.makeQueryForVisitor(visitor), contactUpdater, options);
 	}
 
-	async findSimilarVerifiedContacts<T extends Document = ILivechatContact, O extends FindOptionsWithProjection<T> = FindOptionsWithProjection<T>>({ field, value }: Pick<ILivechatContactChannel, 'field' | 'value'>, originalContactId: string, options?: O): Promise<DocumentWithProjection<T, O>[]> {
+	async findSimilarVerifiedContacts<
+		T extends Document = ILivechatContact,
+		O extends FindOptionsWithProjection<T> = FindOptionsWithProjection<T>,
+	>(
+		{ field, value }: Pick<ILivechatContactChannel, 'field' | 'value'>,
+		originalContactId: string,
+		options?: O,
+	): Promise<DocumentWithProjection<T, O>[]> {
 		return this.find<T, O>(
 			{
 				channels: {
@@ -280,7 +310,10 @@ export class LivechatContactsRaw extends BaseRaw<ILivechatContact> implements IL
 		});
 	}
 
-	async findOneEnabledById<P extends Document = ILivechatContact, O extends FindOptionsWithProjection<P> = FindOptionsWithProjection<P>>(_id: ILivechatContact['_id'], options?: O): Promise<DocumentWithProjection<P, O> | null> {
+	async findOneEnabledById<P extends Document = ILivechatContact, O extends FindOptionsWithProjection<P> = FindOptionsWithProjection<P>>(
+		_id: ILivechatContact['_id'],
+		options?: O,
+	): Promise<DocumentWithProjection<P, O> | null> {
 		return this.findOne<P, O>({ _id, enabled: { $ne: false } }, options);
 	}
 

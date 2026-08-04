@@ -14,11 +14,19 @@ export class CallHistoryRaw extends BaseRaw<CallHistoryItem> implements ICallHis
 		return [{ key: { uid: 1, callId: 1 }, unique: true }, { key: { uid: 1, ts: -1 } }];
 	}
 
-	async findOneByIdAndUid<T extends Document = CallHistoryItem, O extends FindOptionsWithProjection<T> = FindOptionsWithProjection<T>>(_id: CallHistoryItem['_id'], uid: CallHistoryItem['uid'], options?: O): Promise<DocumentWithProjection<T, O> | null> {
+	async findOneByIdAndUid<T extends Document = CallHistoryItem, O extends FindOptionsWithProjection<T> = FindOptionsWithProjection<T>>(
+		_id: CallHistoryItem['_id'],
+		uid: CallHistoryItem['uid'],
+		options?: O,
+	): Promise<DocumentWithProjection<T, O> | null> {
 		return this.findOne<T, O>({ _id, uid }, options);
 	}
 
-	async findOneByCallIdAndUid<T extends Document = CallHistoryItem, O extends FindOptionsWithProjection<T> = FindOptionsWithProjection<T>>(callId: CallHistoryItem['callId'], uid: CallHistoryItem['uid'], options?: O): Promise<DocumentWithProjection<T, O> | null> {
+	async findOneByCallIdAndUid<T extends Document = CallHistoryItem, O extends FindOptionsWithProjection<T> = FindOptionsWithProjection<T>>(
+		callId: CallHistoryItem['callId'],
+		uid: CallHistoryItem['uid'],
+		options?: O,
+	): Promise<DocumentWithProjection<T, O> | null> {
 		return this.findOne<T, O>({ callId, uid }, options);
 	}
 
@@ -40,12 +48,19 @@ export class CallHistoryRaw extends BaseRaw<CallHistoryItem> implements ICallHis
 		);
 	}
 
-	public findAllByUserIdAndSearchFilters<T extends Document = CallHistoryItem, O extends FindOptionsWithProjection<T> = FindOptionsWithProjection<T>>(uid: IUser['_id'], filters: {
+	public findAllByUserIdAndSearchFilters<
+		T extends Document = CallHistoryItem,
+		O extends FindOptionsWithProjection<T> = FindOptionsWithProjection<T>,
+	>(
+		uid: IUser['_id'],
+		filters: {
 			type?: CallHistoryItem['type'];
 			searchTerm?: string;
 			direction?: CallHistoryItem['direction'];
 			inStates?: CallHistoryItem['state'][];
-		}, options?: O): FindPaginated<FindCursor<DocumentWithProjection<T, O>>> {
+		},
+		options?: O,
+	): FindPaginated<FindCursor<DocumentWithProjection<T, O>>> {
 		const { type, direction, inStates, searchTerm } = filters;
 
 		const textSearch = searchTerm ? { $regex: escapeRegExp(searchTerm), $options: 'i' } : null;

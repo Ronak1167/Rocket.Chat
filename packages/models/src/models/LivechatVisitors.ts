@@ -111,7 +111,10 @@ export class LivechatVisitorsRaw extends BaseRaw<ILivechatVisitor> implements IL
 	 * Find visitors by _id
 	 * @param {string} token - Visitor token
 	 */
-	findById<T extends Document = ILivechatVisitor, O extends FindOptionsWithProjection<T> = FindOptionsWithProjection<T>>(_id: string, options?: O): FindCursor<DocumentWithProjection<T, O>> {
+	findById<T extends Document = ILivechatVisitor, O extends FindOptionsWithProjection<T> = FindOptionsWithProjection<T>>(
+		_id: string,
+		options?: O,
+	): FindCursor<DocumentWithProjection<T, O>> {
 		const query = {
 			_id,
 		};
@@ -119,7 +122,10 @@ export class LivechatVisitorsRaw extends BaseRaw<ILivechatVisitor> implements IL
 		return this.find<T, O>(query, options);
 	}
 
-	findEnabled<T extends Document = ILivechatVisitor, O extends FindOptionsWithProjection<T> = FindOptionsWithProjection<T>>(query: Filter<ILivechatVisitor>, options?: O): FindCursor<DocumentWithProjection<T, O>> {
+	findEnabled<T extends Document = ILivechatVisitor, O extends FindOptionsWithProjection<T> = FindOptionsWithProjection<T>>(
+		query: Filter<ILivechatVisitor>,
+		options?: O,
+	): FindCursor<DocumentWithProjection<T, O>> {
 		return this.find<T, O>(
 			{
 				...query,
@@ -129,7 +135,10 @@ export class LivechatVisitorsRaw extends BaseRaw<ILivechatVisitor> implements IL
 		);
 	}
 
-	findOneEnabledById<T extends Document = ILivechatVisitor, O extends FindOptionsWithProjection<T> = FindOptionsWithProjection<T>>(_id: string, options?: O): Promise<DocumentWithProjection<T, O> | null> {
+	findOneEnabledById<T extends Document = ILivechatVisitor, O extends FindOptionsWithProjection<T> = FindOptionsWithProjection<T>>(
+		_id: string,
+		options?: O,
+	): Promise<DocumentWithProjection<T, O> | null> {
 		const query = {
 			_id,
 			disabled: { $ne: true },
@@ -138,7 +147,10 @@ export class LivechatVisitorsRaw extends BaseRaw<ILivechatVisitor> implements IL
 		return this.findOne<T, O>(query, options);
 	}
 
-	getVisitorByToken<T extends Document = ILivechatVisitor, O extends FindOptionsWithProjection<T> = FindOptionsWithProjection<T>>(token: string, options?: O): Promise<DocumentWithProjection<T, O> | null> {
+	getVisitorByToken<T extends Document = ILivechatVisitor, O extends FindOptionsWithProjection<T> = FindOptionsWithProjection<T>>(
+		token: string,
+		options?: O,
+	): Promise<DocumentWithProjection<T, O> | null> {
 		const query = {
 			token,
 		};
@@ -216,7 +228,15 @@ export class LivechatVisitorsRaw extends BaseRaw<ILivechatVisitor> implements IL
 	/**
 	 * Find visitors by their email or phone or username or name
 	 */
-	async findPaginatedVisitorsByEmailOrPhoneOrNameOrUsernameOrCustomField<T extends Document = ILivechatVisitor, O extends FindOptionsWithProjection<T> = FindOptionsWithProjection<T>>(emailOrPhone?: string, nameOrUsername?: RegExp, allowedCustomFields: string[] = [], options?: O): Promise<FindPaginated<FindCursor<DocumentWithProjection<T, O>>>> {
+	async findPaginatedVisitorsByEmailOrPhoneOrNameOrUsernameOrCustomField<
+		T extends Document = ILivechatVisitor,
+		O extends FindOptionsWithProjection<T> = FindOptionsWithProjection<T>,
+	>(
+		emailOrPhone?: string,
+		nameOrUsername?: RegExp,
+		allowedCustomFields: string[] = [],
+		options?: O,
+	): Promise<FindPaginated<FindCursor<DocumentWithProjection<T, O>>>> {
 		if (!emailOrPhone && !nameOrUsername && allowedCustomFields.length === 0) {
 			return this.findPaginated<T, O>({ disabled: { $ne: true } }, options);
 		}
@@ -299,7 +319,7 @@ export class LivechatVisitorsRaw extends BaseRaw<ILivechatVisitor> implements IL
 			$set: {
 				[`livechatData.${key}`]: value,
 			},
-		} as UpdateFilter<ILivechatVisitor>; // TODO: Remove this cast when TypeScript is updated
+		}; // TODO: Remove this cast when TypeScript is updated
 		// TypeScript is not smart enough to infer that `messages.${string}` matches keys of `ILivechatVisitor`;
 
 		return this.updateOne(query, update);
@@ -494,7 +514,10 @@ export class LivechatVisitorsRaw extends BaseRaw<ILivechatVisitor> implements IL
 		return this.findOneAndUpdate({ _id }, { $set: { department } }, { returnDocument: 'after' });
 	}
 
-	findByIds<T extends Document = ILivechatVisitor, O extends FindOptionsWithProjection<T> = FindOptionsWithProjection<T>>(ids: string[], options?: O): FindCursor<DocumentWithProjection<T, O>> {
+	findByIds<T extends Document = ILivechatVisitor, O extends FindOptionsWithProjection<T> = FindOptionsWithProjection<T>>(
+		ids: string[],
+		options?: O,
+	): FindCursor<DocumentWithProjection<T, O>> {
 		const query = {
 			_id: { $in: ids },
 		};
