@@ -45,7 +45,7 @@ export async function createOrUpdateFederatedUser(options: {
 		},
 		{
 			upsert: true,
-			projection: { _id: 1, username: 1 },
+			// TODO removed projection but the correct change is on PR https://github.com/RocketChat/Rocket.Chat/pull/41689
 			returnDocument: 'after',
 		},
 	);
