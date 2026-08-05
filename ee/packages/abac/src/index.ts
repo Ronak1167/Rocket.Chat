@@ -351,7 +351,7 @@ export class AbacService extends ServiceClass implements IAbacService {
 		filters?: { key?: string; values?: string; offset?: number; count?: number },
 		actor?: AbacActor,
 	): Promise<{
-		attributes: IAbacAttribute[];
+		attributes: Pick<IAbacAttribute, 'key' | 'values'>[];
 		offset: number;
 		count: number;
 		total: number;
